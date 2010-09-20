@@ -72,6 +72,7 @@ function templatize_add_defaults() {
 		$arr = array(
    "action" => "templatize",
   );
+/*  
   foreach($templetize_sections as $item) {
    echo $item.'<br />';
    $arr['start_'.$item]='<template-'.$item.'>';
@@ -80,7 +81,7 @@ function templatize_add_defaults() {
   }
   // Now the special cases
   $arr['surround_'.'wp_nav_menu_args']='template-menu-container';
-  
+*/  
 		update_option('templatize_options', $arr);
 	}
 }
@@ -134,7 +135,7 @@ function templatize_render_form() {
 			<?php $options = get_option('templatize_options'); ?>
 			<table xclass="form-table" id="templetize-admin">
 				<tr>
-					<th scope="row">Query String to Activate</th>
+					<th scope="row" style="text-align:left;">Query String to Activate</th>
 					<td>
 						<input name="templatize_options[action]" type='text' value="<?php echo $options['action']; ?>" style="width:200px;" />
 <!--      
@@ -149,7 +150,7 @@ function templatize_render_form() {
   $end_text   = $options['end_'.$item];
   echo <<<FILTERBLOCK
 				<tr valign="top" style="border-top:#dddddd 1px solid;">
-					<th scope="row">Filter for '$item'</th>
+					<th scope="row" style="text-align:left;">Filter for '$item'</th>
 					<td>
 						<input name="templatize_options[start_$item]" type='text' value="$start_text" /><br />
 						<label><input name="templatize_options[include_$item]" type="checkbox" value="1"$checked /> Include contents of $item</label><br />
@@ -168,23 +169,62 @@ FILTERBLOCK;
       <br />
 					</td>
 				</tr>
-			</table>
 <?php
  }
 ?>
+				<tr valign="top" style="border-top:#dddddd 1px solid;">
+					<th scope="row">Load Defaults (careful!)</th>
+					<td>
+						<select name="templatize_options[defaults]"> 
+       <option value="" selected></option>
+       <option value="xhtml">XHTML surrounding tags</option>
+       <option value="mako">Ready for .mako creation</option>
+      </select>
+      <br />
+					</td>
+				</tr>
+			</table>
 			<p class="submit">
 			<input type="submit" class="button-primary" value="<?php _e('Save Changes') ?>" />
 			</p>
 		</form>
 
 	</div>
+ 
+ 
 	<?php	
 }
 
 // Sanitize and validate input. Accepts an array, return a sanitized array.
 function templatize_validate_options($input) {
-	 // strip html from textboxes
+ global $templetize_sections;
+
+ // strip html from textboxes
 //	$input['templatize_something'] =  wp_filter_nohtml_kses($input['templatize_something']);
+
+ $type=$input['defaults'];
+ if($type) {
+// 	$arr = get_option('templatize_options');
+  if($type=='xhtml') {
+   foreach($templetize_sections as $item) {
+    $input['start_'.$item]='<template-'.$item.'>';
+    $input['include_'.$item]=1;
+    $input['end_'.$item]='</template-'.$item.'>';
+   }
+   // Now the special cases
+   $input['surround_'.'wp_nav_menu_args']='template-menu-container';
+  }
+  else if($type=='mako') {
+   foreach($templetize_sections as $item) {
+    $input['start_'.$item]='';
+    $input['include_'.$item]=0;
+    $input['end_'.$item]='${c.wp.'.$item.'}';
+   }
+   // Now the special cases
+   $input['surround_'.'wp_nav_menu_args']='template-menu-container';  // Hmm...
+  }
+//		update_option('templatize_options', $arr);
+ }
 	return $input;
 }
 
