@@ -179,6 +179,7 @@ FILTERBLOCK;
        <option value="" selected></option>
        <option value="xhtml">XHTML surrounding tags</option>
        <option value="mako">Ready for .mako creation</option>
+       <option value="ruby">Ready for RoR</option>
       </select>
       <br />
 					</td>
@@ -222,6 +223,17 @@ function templatize_validate_options($input) {
    }
    // Now the special cases
    $input['surround_'.'wp_nav_menu_args']='template-menu-container';  // Hmm...
+  }
+  else if($type=='ruby') {
+   foreach($templetize_sections as $item) {
+    $input['start_'.$item]='';
+    $input['include_'.$item]=1;
+    $input['end_'.$item]='';
+   }
+   // Now the special cases
+   $input['include_'.'the_content']=0;
+   $input['end_'.'the_content']='<%= yield %>';
+   $input['surround_'.'wp_nav_menu_args']='';  // Hmm...
   }
 //		update_option('templatize_options', $arr);
  }
